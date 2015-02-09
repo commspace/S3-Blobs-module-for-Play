@@ -8,10 +8,12 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
 
 import play.db.Model.BinaryField;
+import play.db.jpa.JPA;
 import play.libs.Codec;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -116,8 +118,8 @@ public class S3Blob implements BinaryField, UserType, Serializable {
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, Object o) throws HibernateException, SQLException {
-		String val = StringType.INSTANCE.nullSafeGet(rs, names[0]);
+	public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor session, Object o) throws HibernateException, SQLException {
+		String val = StringType.INSTANCE.nullSafeGet(rs, names[0], ((SessionImplementor) JPA.em().getDelegate()));
 		if (val == null || val.length() == 0 || !val.contains("|")) {
 			return new S3Blob();
 		}
@@ -125,7 +127,7 @@ public class S3Blob implements BinaryField, UserType, Serializable {
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object o, int i) throws HibernateException, SQLException {
+	public void nullSafeSet(PreparedStatement ps, Object o, int i, SessionImplementor session) throws HibernateException, SQLException {
 		if (o != null) {
 			ps.setString(i, ((S3Blob) o).bucket + "|" + ((S3Blob) o).key);
 		} else {
