@@ -93,8 +93,9 @@ public class S3Blob implements BinaryField, UserType, Serializable {
 		if (bucket == null || bucket.isEmpty() || key == null || key.isEmpty()) {
 			return false;
 		}
-		ObjectMetadata om = s3Client.getObjectMetadata(bucket, key);
-		return om != null;
+		//ObjectMetadata om = s3Client.getObjectMetadata(bucket, key);
+		return s3Client.doesObjectExist(bucket, key);
+		//return om != null;
 	}
 
 	@Override
