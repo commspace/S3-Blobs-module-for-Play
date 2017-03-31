@@ -1,8 +1,8 @@
-self: play -> s3blobs 0.8
+self: play -> s3blobs 0.9.1
 
 require:
     - play
-    - com.amazonaws -> aws-java-sdk-s3 1.11.95:
+    - com.amazonaws -> aws-java-sdk-s3 1.11.100:
         exclude:
             - org.freemarker -> freemarker
             - org.springframework -> spring-beans

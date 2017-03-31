@@ -1,13 +1,19 @@
 package play.modules.s3blobs;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.RegionUtils;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.internal.BucketNameUtils;
+import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.BucketPolicy;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.exceptions.ConfigurationException;
-
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
 
 public class S3Blobs extends PlayPlugin {
 
@@ -26,13 +32,19 @@ public class S3Blobs extends PlayPlugin {
 			throw new ConfigurationException("Bad configuration for s3: no secret key");
 		} else if (!Play.configuration.containsKey("s3.bucket")) {
 			throw new ConfigurationException("Bad configuration for s3: no s3 bucket");
-		}
+        } else if (!Play.configuration.containsKey("s3.region")) {
+            throw new ConfigurationException("Bad configuration for s3: no s3 region");
+        }
+
+		String region = Play.configuration.getProperty("s3.region");
 		S3Blob.s3Bucket = Play.configuration.getProperty("s3.bucket");
 		S3Blob.serverSideEncryption = ConfigHelper.getBoolean("s3.useServerSideEncryption", false);
 		String accessKey = Play.configuration.getProperty("aws.access.key");
 		String secretKey = Play.configuration.getProperty("aws.secret.key");
-		AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-		S3Blob.s3Client = new AmazonS3Client(awsCredentials);
+		BasicAWSCredentials creds = new BasicAWSCredentials(accessKey, secretKey);
+		Regions regions = Regions.fromName(region);
+		
+		S3Blob.s3Client = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(creds)).withRegion(regions).build();
 		if (!S3Blob.s3Client.doesBucketExist(S3Blob.s3Bucket)) {
 			S3Blob.s3Client.createBucket(S3Blob.s3Bucket);
 		}

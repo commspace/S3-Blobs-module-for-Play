@@ -12,13 +12,13 @@ import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
 
-import play.db.Model.BinaryField;
-import play.db.jpa.JPA;
-import play.libs.Codec;
-
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+
+import play.db.Model.BinaryField;
+import play.db.jpa.JPA;
+import play.libs.Codec;
 
 public class S3Blob implements BinaryField, UserType, Serializable {
 
@@ -67,7 +67,7 @@ public class S3Blob implements BinaryField, UserType, Serializable {
 			om.setContentLength(contentLength);
 		}
 		if (serverSideEncryption) {
-			om.setServerSideEncryption(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
+			om.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
 		}
 		s3Client.putObject(bucket, key, is, om);
 	}
@@ -93,9 +93,7 @@ public class S3Blob implements BinaryField, UserType, Serializable {
 		if (bucket == null || bucket.isEmpty() || key == null || key.isEmpty()) {
 			return false;
 		}
-		//ObjectMetadata om = s3Client.getObjectMetadata(bucket, key);
 		return s3Client.doesObjectExist(bucket, key);
-		//return om != null;
 	}
 
 	@Override
