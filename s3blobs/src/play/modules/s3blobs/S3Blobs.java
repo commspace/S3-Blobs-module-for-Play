@@ -1,5 +1,7 @@
 package play.modules.s3blobs;
 
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.ClientConfigurationFactory;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Region;
@@ -44,7 +46,13 @@ public class S3Blobs extends PlayPlugin {
 		BasicAWSCredentials creds = new BasicAWSCredentials(accessKey, secretKey);
 		Regions regions = Regions.fromName(region);
 		
-		S3Blob.s3Client = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(creds)).withRegion(regions).build();
+		// Due to trouble with connections, allow the overridng of these connection values from config 
+		ClientConfiguration config = new ClientConfiguration();
+		config.setConnectionTimeout(ConfigHelper.getInt("s3.clientConfiguration.connectionTimeout", 5000)); // 5 seconds;
+		config.setConnectionTTL(ConfigHelper.getInt("s3.clientConfiguration.connectionTTL", 120000)); // 2 minutes
+		config.setMaxConnections(ConfigHelper.getInt("s3.clientConfiguration.maxConnections", 75));
+		
+		S3Blob.s3Client = AmazonS3ClientBuilder.standard().withClientConfiguration(config).withCredentials(new AWSStaticCredentialsProvider(creds)).withRegion(regions).build();
 		if (!S3Blob.s3Client.doesBucketExist(S3Blob.s3Bucket)) {
 			S3Blob.s3Client.createBucket(S3Blob.s3Bucket);
 		}
