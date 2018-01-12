@@ -9,6 +9,7 @@ import java.sql.Types;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
 
@@ -117,7 +118,7 @@ public class S3Blob implements BinaryField, UserType, Serializable {
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor session, Object o) throws HibernateException, SQLException {
+	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object o) throws HibernateException, SQLException {
 		String val = StringType.INSTANCE.nullSafeGet(rs, names[0], ((SessionImplementor) JPA.em().getDelegate()));
 		if (val == null || val.length() == 0 || !val.contains("|")) {
 			return new S3Blob();
@@ -126,7 +127,7 @@ public class S3Blob implements BinaryField, UserType, Serializable {
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object o, int i, SessionImplementor session) throws HibernateException, SQLException {
+	public void nullSafeSet(PreparedStatement ps, Object o, int i, SharedSessionContractImplementor session) throws HibernateException, SQLException {
 		if (o != null) {
 			ps.setString(i, ((S3Blob) o).bucket + "|" + ((S3Blob) o).key);
 		} else {
