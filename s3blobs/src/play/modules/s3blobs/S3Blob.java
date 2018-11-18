@@ -47,10 +47,18 @@ public class S3Blob implements BinaryField, UserType, Serializable {
 		this.contentLength = contentLength;
 	}	
 
-	private S3Blob(String bucket, String s3Key) {
+	public S3Blob(String bucket, String s3Key) {
 		this.bucket = bucket;
 		this.key = s3Key;
 	}
+	
+	public String getKey() {
+	    return key;
+	}
+	
+    public String getBucket() {
+        return bucket;
+    }
 
 	@Override
 	public InputStream get() {
@@ -119,9 +127,9 @@ public class S3Blob implements BinaryField, UserType, Serializable {
 
 	@Override
 	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object o) throws HibernateException, SQLException {
-		String val = StringType.INSTANCE.nullSafeGet(rs, names[0], ((SessionImplementor) JPA.em().getDelegate()));
-		if (val == null || val.length() == 0 || !val.contains("|")) {
-			return new S3Blob();
+		String val = StringType.INSTANCE.nullSafeGet(rs, names[0], session);
+		if (val == null || val.length() == 0 || !val.contains("|") || val.equals("null|null")) {
+            return null;
 		}
 		return new S3Blob(val.split("[|]")[0], val.split("[|]")[1]);
 	}
@@ -160,6 +168,6 @@ public class S3Blob implements BinaryField, UserType, Serializable {
 
 	@Override
 	public Object replace(Object o, Object o1, Object o2) throws HibernateException {
-		throw new UnsupportedOperationException("Not supported yet.");
+	    return o;
 	}
 }
