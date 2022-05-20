@@ -1,8 +1,8 @@
-self: play -> s3blobs 1.6
+self: play -> s3blobs 1.6.1
 
 require:
     - play
-    - com.amazonaws -> aws-java-sdk-s3 1.11.813:
+    - com.amazonaws -> aws-java-sdk-s3 1.12.220:
         exclude:
             - org.freemarker -> freemarker
             - org.springframework -> spring-beans
@@ -17,3 +17,6 @@ require:
             - stax -> stax    
             - mail -> javax.mail
             - junit -> junit
+
+    - com.fasterxml.jackson.core -> jackson-databind 2.13.2.2:
+          force: true

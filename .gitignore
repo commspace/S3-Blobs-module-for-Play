@@ -4,3 +4,5 @@
 /.settings/
 /dist/
 /.DS_Store
+/out/
+/.idea
